@@ -9,10 +9,11 @@ import 'package:uisample/viewModels/global_change_notifier.dart';
 
 class ThemeSelectionScreen extends StatefulWidget {
   final List<Gradient> gradientList;
-  final Function executeOnTap;
+  final Function(Offset) executeOnTap;
   final double width;
+  final Gradient currentThemeGradient;
 
-  ThemeSelectionScreen({this.gradientList, this.executeOnTap, this.width});
+  ThemeSelectionScreen({this.currentThemeGradient,this.gradientList, this.executeOnTap, this.width});
 
   @override
   _ThemeSelectionScreenState createState() => _ThemeSelectionScreenState();
@@ -28,16 +29,17 @@ class _ThemeSelectionScreenState extends State<ThemeSelectionScreen> with Ticker
 
   @override
   Widget build(BuildContext context) {
-    return ThemeSelector(onScroll: (double scrollPercent) {}, executeOnTap: widget.executeOnTap, width: widget.width);
+    return ThemeSelector(currentThemeGradient: widget.currentThemeGradient,onScroll: (double scrollPercent) {}, executeOnTap: widget.executeOnTap, width: widget.width);
   }
 }
 
 class ThemeSelector extends StatefulWidget {
   final Function(double scrollPercent) onScroll;
-  final Function executeOnTap;
+  final Function(Offset) executeOnTap;
   final double width;
+  final Gradient currentThemeGradient;
 
-  ThemeSelector({this.onScroll, this.executeOnTap, this.width});
+  ThemeSelector({this.currentThemeGradient,this.onScroll, this.executeOnTap, this.width});
 
   @override
   _ThemeSelectorState createState() => _ThemeSelectorState();
@@ -55,11 +57,11 @@ class _ThemeSelectorState extends State<ThemeSelector> with TickerProviderStateM
   double currentPage = 0;
   List<Gradient> gradientList = [
     LinearGradient(begin: Alignment.topRight, end: Alignment.bottomLeft, colors: [Color(0xFFFECEA6), Color(0xFFFF9E9D)]),
-    LinearGradient(begin: Alignment.topRight, end: Alignment.bottomLeft, colors: [Color(0xFFE72518), Color(0xFFE75D53)]),
-    LinearGradient(begin: Alignment.topRight, end: Alignment.bottomLeft, colors: [Color(0xFF15B213), Color(0xFF4D944B)]),
-    LinearGradient(begin: Alignment.topRight, end: Alignment.bottomLeft, colors: [Color(0xFF1AB1A2), Color(0xFF58ADA4)]),
-    LinearGradient(begin: Alignment.topRight, end: Alignment.bottomLeft, colors: [Color(0xFF501DA1), Color(0xFF7958AD)]),
-    LinearGradient(begin: Alignment.topRight, end: Alignment.bottomLeft, colors: [Color(0xFF666469), Color(0xFFE3D9F2)]),
+    LinearGradient(begin: Alignment.topRight, end: Alignment.bottomLeft, colors: [Color(0xFFF9B9B9), Color(0xFFE72518)]),
+    LinearGradient(begin: Alignment.topRight, end: Alignment.bottomLeft, colors: [Color(0xFFA1D19A), Color(0xFF15B213)]),
+    LinearGradient(begin: Alignment.topRight, end: Alignment.bottomLeft, colors: [Color(0xFFC7F8F1), Color(0xFF1AB1A2)]),
+    LinearGradient(begin: Alignment.topRight, end: Alignment.bottomLeft, colors: [Color(0xFFEDCAFA), Color(0xFF501DA1)]),
+    LinearGradient(begin: Alignment.topRight, end: Alignment.bottomLeft, colors: [Color(0xFFE3D9F2), Color(0xFF666469)]),
   ];
 
   @override
@@ -86,7 +88,6 @@ class _ThemeSelectorState extends State<ThemeSelector> with TickerProviderStateM
       setState(() {
         currentPage = _pageController.page == null ? 0 : _pageController.page;
         scrollPercent = _pageController.page / 6;
-        print("PAGE SCROLL :::: ${_pageController.page}");
       });
     });
   }
@@ -99,6 +100,7 @@ class _ThemeSelectorState extends State<ThemeSelector> with TickerProviderStateM
 
   @override
   Widget build(BuildContext context) {
+    final theme = Theme.of(context);
     return Container(
       child: Stack(
         children: [
@@ -107,7 +109,44 @@ class _ThemeSelectorState extends State<ThemeSelector> with TickerProviderStateM
               return Container();
             },
           ),
-          _buildThemeAvatar(widget.width),
+          Column(
+            children: <Widget>[
+              Text(
+                "Themes, User",
+                style: theme.textTheme.bodyText1.copyWith(fontWeight: FontWeight.bold, fontSize: 24),
+                textAlign: TextAlign.center,
+              ),
+              Text(
+                "Which one is most you?",
+                style: theme.textTheme.bodyText1.copyWith(fontWeight: FontWeight.bold, fontSize: 24),
+                textAlign: TextAlign.center,
+              ),
+              SizedBox(height: 12),
+              Text(
+                "CAN BE CHANGED LATER IN SETTINGS",
+                style: theme.textTheme.bodyText2.copyWith(fontWeight: FontWeight.bold),
+                textAlign: TextAlign.center,
+              ),
+              Expanded(
+                child: _buildThemeAvatar(widget.width),
+              ),
+              Container(
+                padding:  EdgeInsets.symmetric(horizontal:32.0,vertical: 16),
+                decoration: BoxDecoration(
+                  borderRadius: BorderRadius.circular(60),
+                  color: Colors.white,
+                ),
+                child: Text(
+                  "NEXT",
+                  style: theme.textTheme.bodyText2.copyWith(
+                    color: widget.currentThemeGradient.colors[1],
+                    fontSize: 16,
+                    fontWeight: FontWeight.bold,
+                  ),
+                ),
+              ),
+            ],
+          ),
         ],
       ),
     );
@@ -142,9 +181,11 @@ class _ThemeSelectorState extends State<ThemeSelector> with TickerProviderStateM
         child: Consumer<GlobalChangeNotifier>(
           builder: (context, notifier, child) {
             return GestureDetector(
-              onTap: () {
+              onTapUp: (TapUpDetails details) {
+                _pageController.animateToPage(index, duration: Duration(milliseconds: 250), curve: Curves.ease);
+                Offset clickedPosition = details.globalPosition;
                 notifier.setCurrentThemeGradient(gradientList[index]);
-                widget.executeOnTap();
+                widget.executeOnTap(clickedPosition);
               },
               child: Column(
                 mainAxisSize: MainAxisSize.max,

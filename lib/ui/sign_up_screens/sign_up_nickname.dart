@@ -36,6 +36,8 @@ class _SignUpNicknameScreenState extends State<SignUpNicknameScreen> with Ticker
   int currentPageIndex = 0;
   GlobalChangeNotifier _notifier;
 
+  Offset clickedGlobalPosition;
+
   @override
   void initState() {
     super.initState();
@@ -69,9 +71,7 @@ class _SignUpNicknameScreenState extends State<SignUpNicknameScreen> with Ticker
             return true;
           } else {
             --currentPageIndex;
-            setState(() {
-
-            });
+            setState(() {});
           }
           return false;
         },
@@ -89,6 +89,7 @@ class _SignUpNicknameScreenState extends State<SignUpNicknameScreen> with Ticker
                   animation: controller,
                   builder: (context, child) {
                     return PageReveal(
+                      clickedGlobalPosition: clickedGlobalPosition,
                       revealPercent: revealAnimation.value,
                       child: Container(
                         decoration: BoxDecoration(
@@ -107,150 +108,157 @@ class _SignUpNicknameScreenState extends State<SignUpNicknameScreen> with Ticker
                       if (widget.animation == null) {
                         return Container();
                       } else {
-                        if (currentPageIndex == 0) {
-                          return SingleChildScrollView(
-                            child: Container(
-                              height: containerHeight,
-                              padding: EdgeInsets.symmetric(horizontal: 32),
-                              child: Column(
-                                crossAxisAlignment: CrossAxisAlignment.center,
-                                children: <Widget>[
-                                  SizedBox(height: 32),
-                                  Align(
-                                    alignment: Alignment.centerLeft,
-                                    child: SlideTransition(
-                                      position: Tween(begin: Offset(-3, 0), end: Offset.zero).animate(widget.animation),
-                                      child: InkWell(
-                                        onTap: () {
-                                          Navigator.of(context).pop();
-                                        },
-                                        child: Icon(Icons.chevron_left, color: Colors.white),
+                        return SingleChildScrollView(
+                          child: Container(
+                            height: containerHeight,
+                            padding: EdgeInsets.symmetric(horizontal: 32),
+                            child: Column(
+                              crossAxisAlignment: CrossAxisAlignment.center,
+                              children: <Widget>[
+                                SizedBox(height: 32),
+                                Align(
+                                  alignment: Alignment.centerLeft,
+                                  child: SlideTransition(
+                                    position: Tween(begin: Offset(-3, 0), end: Offset.zero).animate(widget.animation),
+                                    child: InkWell(
+                                      onTap: () {
+                                        Navigator.of(context).pop();
+                                      },
+                                      child: Icon(Icons.chevron_left, color: Colors.white),
+                                    ),
+                                  ),
+                                ),
+                                Center(
+                                  child: Hero(
+                                    tag: 'logo_image',
+                                    child: Container(
+                                      width: 80,
+                                      height: 80,
+                                      child: FlareActor(
+                                        "assets/rive/robot_assistant.flr",
+                                        alignment: Alignment.center,
+                                        animation: "reposo",
+                                        fit: BoxFit.cover,
                                       ),
                                     ),
                                   ),
-                                  Center(
-                                    child: Hero(
-                                      tag: 'logo_image',
-                                      child: Container(
-                                        width: 80,
-                                        height: 80,
-                                        child: FlareActor(
-                                          "assets/rive/robot_assistant.flr",
-                                          alignment: Alignment.center,
-                                          animation: "reposo",
-                                          fit: BoxFit.cover,
-                                        ),
-                                      ),
-                                    ),
-                                  ),
-                                  SizedBox(height: 8),
-                                  Flexible(
-                                    child: SlideTransition(
-                                      position: Tween(begin: Offset(3, 0), end: Offset.zero).animate(widget.animation),
-                                      child: Column(
-                                        mainAxisSize: MainAxisSize.max,
-                                        mainAxisAlignment: MainAxisAlignment.start,
-                                        children: <Widget>[
-                                          Text(
-                                            "So nice to meet you! What do your friends call you?",
-                                            style: theme.textTheme.bodyText1.copyWith(fontSize: 20, fontWeight: FontWeight.bold),
-                                            textAlign: TextAlign.center,
-                                          ),
-                                          SizedBox(height: 12),
-                                          Stack(
-                                            children: [
-                                              Container(
-                                                decoration: BoxDecoration(
-                                                  color: Color(0xFFFF9E9D).withOpacity(0.4),
-                                                  borderRadius: BorderRadius.circular(10),
-                                                ),
-                                                padding: EdgeInsets.symmetric(vertical: 16, horizontal: 16.0),
-                                                child: Padding(
-                                                  padding: EdgeInsets.only(bottom: MediaQuery.of(context).viewInsets.bottom),
-                                                  child: TextField(
-                                                    keyboardType: TextInputType.text,
-                                                    textAlign: TextAlign.center,
-                                                    style: theme.textTheme.bodyText2.copyWith(color: theme.accentColor, fontSize: 20),
-                                                    decoration: InputDecoration(
-                                                      hintText: "Your nickname...",
-                                                      contentPadding: EdgeInsets.symmetric(vertical: 16.0, horizontal: 16.0),
-                                                      border: new OutlineInputBorder(
-                                                        borderSide: BorderSide.none,
-                                                        borderRadius: const BorderRadius.all(
-                                                          const Radius.circular(10.0),
+                                ),
+                                SizedBox(height: 8),
+                                Flexible(
+                                  child: SlideTransition(
+                                    position: Tween(begin: Offset(3, 0), end: Offset.zero).animate(widget.animation),
+                                    child: () {
+                                      /**
+                                       * Set Widget based on current index
+                                       * */
+                                      if (currentPageIndex == 0) {
+                                        return Column(
+                                          mainAxisSize: MainAxisSize.max,
+                                          mainAxisAlignment: MainAxisAlignment.start,
+                                          children: <Widget>[
+                                            Text(
+                                              "So nice to meet you! What do your friends call you?",
+                                              style: theme.textTheme.bodyText1.copyWith(fontSize: 20, fontWeight: FontWeight.bold),
+                                              textAlign: TextAlign.center,
+                                            ),
+                                            SizedBox(height: 12),
+                                            Stack(
+                                              children: [
+                                                Container(
+                                                  decoration: BoxDecoration(
+                                                    color: notifier.currentThemeGradient.colors[0].withOpacity(0.4),
+                                                    borderRadius: BorderRadius.circular(10),
+                                                  ),
+                                                  padding: EdgeInsets.symmetric(vertical: 16, horizontal: 16.0),
+                                                  child: Padding(
+                                                    padding: EdgeInsets.only(bottom: MediaQuery.of(context).viewInsets.bottom),
+                                                    child: TextField(
+                                                      keyboardType: TextInputType.text,
+                                                      textAlign: TextAlign.center,
+                                                      style: theme.textTheme.bodyText2.copyWith(color: theme.accentColor, fontSize: 20),
+                                                      decoration: InputDecoration(
+                                                        hintText: "Your nickname...",
+                                                        contentPadding: EdgeInsets.symmetric(vertical: 16.0, horizontal: 16.0),
+                                                        border: new OutlineInputBorder(
+                                                          borderSide: BorderSide.none,
+                                                          borderRadius: const BorderRadius.all(
+                                                            const Radius.circular(10.0),
+                                                          ),
                                                         ),
+                                                        focusColor: Colors.red,
+                                                        hintStyle: theme.textTheme.bodyText2.copyWith(color: theme.accentColor, fontSize: 20),
                                                       ),
-                                                      focusColor: Colors.red,
-                                                      hintStyle: theme.textTheme.bodyText2.copyWith(color: theme.accentColor, fontSize: 20),
                                                     ),
                                                   ),
                                                 ),
-                                              ),
-                                            ],
-                                          ),
-                                          Flexible(child: Container()),
-                                          Padding(
-                                            padding: const EdgeInsets.symmetric(horizontal: 32.0),
-                                            child: Transform.translate(
-                                              offset: Offset(0, 0),
-                                              child: InkWell(
-                                                onTap: () {
-                                                  setState(() {
-                                                    currentPageIndex = 1;
-                                                  });
-                                                },
-                                                child: Container(
-                                                  padding: EdgeInsets.symmetric(vertical: 16),
-                                                  decoration: BoxDecoration(
-                                                    borderRadius: BorderRadius.circular(60),
-                                                    color: Colors.white,
-                                                  ),
-                                                  child: Center(
-                                                    child: Text(
-                                                      "CONTINUE",
-                                                      style: TextStyle(
-                                                        color: notifier.currentThemeGradient.colors[1],
-                                                        fontWeight: FontWeight.bold,
+                                              ],
+                                            ),
+                                            Flexible(child: Container()),
+                                            Padding(
+                                              padding: const EdgeInsets.symmetric(horizontal: 32.0),
+                                              child: Transform.translate(
+                                                offset: Offset(0, 0),
+                                                child: InkWell(
+                                                  onTap: () {
+                                                    setState(() {
+                                                      currentPageIndex = 1;
+                                                    });
+                                                  },
+                                                  child: Container(
+                                                    padding: EdgeInsets.symmetric(vertical: 16),
+                                                    decoration: BoxDecoration(
+                                                      borderRadius: BorderRadius.circular(60),
+                                                      color: Colors.white,
+                                                    ),
+                                                    child: Center(
+                                                      child: Text(
+                                                        "CONTINUE",
+                                                        style: TextStyle(
+                                                          color: notifier.currentThemeGradient.colors[1],
+                                                          fontWeight: FontWeight.bold,
+                                                        ),
                                                       ),
                                                     ),
                                                   ),
                                                 ),
                                               ),
                                             ),
+                                          ],
+                                        );
+                                      } else if (currentPageIndex == 1) {
+                                        return Container(
+                                          height: containerHeight,
+                                          child: ThemeSelectionScreen(
+                                            currentThemeGradient: notifier.currentThemeGradient,
+                                            width: size.width,
+                                            executeOnTap: (Offset clickedPosition) {
+                                              this.clickedGlobalPosition = clickedPosition;
+                                              try {
+                                                controller.forward();
+                                              } catch (e) {}
+                                            },
                                           ),
-                                        ],
-                                      ),
-                                    ),
+                                        );
+                                      } else {
+                                        return Container();
+                                      }
+                                    }(),
                                   ),
-                                  SizedBox(height: 32),
-                                  SlideTransition(
-                                    position: Tween(begin: Offset(0, 60), end: Offset.zero).animate(widget.animation),
-                                    child: Container(
-                                      width: 64,
-                                      height: 4,
-                                      color: theme.accentColor.withOpacity(0.6),
-                                    ),
+                                ),
+                                SizedBox(height: 32),
+                                SlideTransition(
+                                  position: Tween(begin: Offset(0, 60), end: Offset.zero).animate(widget.animation),
+                                  child: Container(
+                                    width: 64,
+                                    height: 4,
+                                    color: theme.accentColor.withOpacity(0.6),
                                   ),
-                                  SizedBox(height: 32),
-                                ],
-                              ),
+                                ),
+                                SizedBox(height: 32),
+                              ],
                             ),
-                          );
-                        } else if (currentPageIndex == 1) {
-                          return Container(
-                            height: containerHeight,
-                            child: ThemeSelectionScreen(
-                              width: size.width,
-                              executeOnTap: () {
-                                try {
-                                  controller.forward();
-                                } catch (e) {}
-                              },
-                            ),
-                          );
-                        } else {
-                          return Container();
-                        }
+                          ),
+                        );
                       }
                     },
                   ),
